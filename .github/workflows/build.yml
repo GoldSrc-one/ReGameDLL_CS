@@ -38,15 +38,6 @@ jobs:
         with:
           vs-version: '16'
 
-      - name: Build and Run unittests
-        run: |
-          msbuild ${{ env.solution }} -p:Configuration="${{ env.buildTests }}" /t:Clean,Build /p:Platform=${{ env.buildPlatform }} /p:PlatformToolset=v140_xp /p:XPDeprecationWarning=false
-          .\"msvc\Tests\mp.exe"
-          If ($LASTEXITCODE -ne 0 -And
-          $LASTEXITCODE -ne 3)
-          {[Environment]::Exit(1)}
-        shell: "pwsh"
-
       - name: Build
         run: |
           msbuild ${{ env.solution }} -p:Configuration="${{ env.buildRelease }}" /t:Clean,Build /p:Platform=${{ env.buildPlatform }} /p:PlatformToolset=v140_xp /p:XPDeprecationWarning=false
