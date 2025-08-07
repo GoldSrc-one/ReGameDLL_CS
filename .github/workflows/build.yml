@@ -23,7 +23,6 @@ jobs:
       buildPlatform: 'Win32'
       buildRelease: 'Release'
       buildReleasePlay: 'Release Play'
-      buildTests: 'Tests'
 
     steps:
       - name: Configure
