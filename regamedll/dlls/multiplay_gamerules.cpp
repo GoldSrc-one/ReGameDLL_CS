@@ -972,7 +972,7 @@ void CHalfLifeMultiplay::InitializePlayerCounts(int &NumAliveTerrorist, int &Num
 				m_iNumSpawnableCT++;
 			}
 
-			if (pPlayer->pev->deadflag != DEAD_NO)
+			if (pPlayer->pev->deadflag != DEAD_NO && pPlayer->pev->deadflag != DEAD_FEIGNING)
 				NumDeadCT++;
 			else
 				NumAliveCT++;
@@ -988,7 +988,7 @@ void CHalfLifeMultiplay::InitializePlayerCounts(int &NumAliveTerrorist, int &Num
 				m_iNumSpawnableTerrorist++;
 			}
 
-			if (pPlayer->pev->deadflag != DEAD_NO)
+			if (pPlayer->pev->deadflag != DEAD_NO && pPlayer->pev->deadflag != DEAD_FEIGNING)
 				NumDeadTerrorist++;
 			else
 				NumAliveTerrorist++;

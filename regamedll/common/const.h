@@ -138,6 +138,7 @@
 #define DEAD_DEAD                   2 // dead. lying still.
 #define DEAD_RESPAWNABLE            3 // do respawn the entity
 #define DEAD_DISCARDBODY            4
+#define DEAD_FEIGNING				5 // TFC spy feigning death
 
 #define DAMAGE_NO                   0
 #define DAMAGE_YES                  1
