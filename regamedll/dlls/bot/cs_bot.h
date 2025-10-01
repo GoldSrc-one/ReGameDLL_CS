@@ -921,6 +921,10 @@ private:
 	CBasePlayer *m_attacker;				// last enemy that hurt us (may not be same as m_enemy)
 	float m_attackedTimestamp;				// when we were hurt by the m_attacker
 
+#ifdef REGAMEDLL_ADD
+	EntityHandle<CBaseEntity> m_attackingMonster; // last monster that hurt the player
+#endif
+
 	int m_lastVictimID;						// the entindex of the last victim we killed, or zero
 	bool m_isAimingAtEnemy;					// if true, we are trying to aim at our enemy
 	bool m_isRapidFiring;					// if true, RunUpkeep() will toggle our primary attack as fast as it can
