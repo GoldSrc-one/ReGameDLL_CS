@@ -164,6 +164,13 @@ BOOL CCSBot::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 		}
 	}
 
+#ifdef REGAMEDLL_ADD
+	// store the attacking monster
+	if((pevInflictor->flags & FL_MONSTER) && !(pevInflictor->flags & FL_NOTARGET) && pevInflictor->takedamage != DAMAGE_NO && pevInflictor->deadflag == DEAD_NO && pevInflictor->solid != SOLID_NOT) {
+		m_attackingMonster = pAttacker;
+	}
+#endif
+
 	// extend
 	return CBasePlayer::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }

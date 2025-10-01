@@ -541,6 +541,28 @@ void CCSBot::Update()
 		EquipBestWeapon();
 	}
 
+#ifdef REGAMEDLL_ADD
+	// if we have been attacked by a monster, fight back
+	if(m_attackingMonster) {
+		if(m_attackingMonster.IsValid() && !(m_attackingMonster->pev->flags & FL_NOTARGET) && m_attackingMonster->pev->takedamage != DAMAGE_NO && m_attackingMonster->pev->deadflag == DEAD_NO && m_attackingMonster->pev->solid != SOLID_NOT && m_attackingMonster->pev->health > 0) {
+			MoveTo(&m_attackingMonster->pev->origin, FASTEST_ROUTE);
+			if(IsVisible(&m_attackingMonster->pev->origin) && (!IsUsingKnife() || (pev->origin - m_attackingMonster->pev->origin).IsLengthLessThan(64))) {
+				auto monsterPosition = 0.5f * (m_attackingMonster->pev->absmin + m_attackingMonster->pev->absmax) + m_attackingMonster->pev->velocity * g_flBotFullThinkInterval;
+				SetLookAt("Monster", &monsterPosition, PRIORITY_UNINTERRUPTABLE, 0.2f, false, 0.1f);
+				if(IsLookingAtPosition(&monsterPosition, 10.f)) {
+					if(IsUsingPistol())
+						TogglePrimaryAttack();
+					else
+						PrimaryAttack();
+				}
+			}
+		}
+		else {
+			m_attackingMonster = nullptr;
+		}
+	}
+#endif
+
 	// if we haven't seen an enemy in awhile, and we switched to our pistol during combat,
 	// switch back to our primary weapon (if it still has ammo left)
 	const float safeRearmTime = 5.0f;
@@ -670,7 +692,7 @@ void CCSBot::Update()
 				Idle();
 			}
 		}
-		break;
+		break; 
 	}
 	}
 
