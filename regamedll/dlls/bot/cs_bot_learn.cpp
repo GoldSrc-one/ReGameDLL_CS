@@ -280,18 +280,35 @@ bool CCSBot::LearnStep()
 				Vector from, to;
 
 				// modify position to account for change in ground level during step
-				to.x = pos.x;
-				to.y = pos.y;
+				float toGround;
 				Vector toNormal;
-				if (GetGroundHeight(&pos, &to.z, &toNormal) == false)
+				if (GetGroundHeight(&pos, &toGround, &toNormal) == false)
 				{
 					return true;
 				}
+
+				to.x = pos.x;
+				to.y = pos.y;
+				to.z = toGround;
 
 				from = *m_currentNode->GetPosition();
 
 				Vector fromOrigin = from + Vector(0, 0, feetOffset);
 				Vector toOrigin = to + Vector(0, 0, feetOffset);
+
+#if REGAMEDLL_FIXES
+				// If this is a drop, tracing directly to the destination might hit the edge
+				// So instead I'm tracing forward where the player would go before dropping down
+				Vector fromNormal = *m_currentNode->GetNormal();
+				Vector traceDirection = toOrigin - fromOrigin;
+				if(DotProduct(fromNormal, traceDirection) < 0) {
+					// The target position is below the current plane
+					// Project the target position so it sits nicely on the plane
+					float dot = DotProduct2D(fromNormal, traceDirection);
+					float toPlaneZ = dot / -fromNormal.z;
+					toOrigin.z = fromOrigin.z + toPlaneZ;
+				}
+#endif
 
 				UTIL_SetOrigin(pev, toOrigin);
 				UTIL_TraceLine(fromOrigin, toOrigin, ignore_monsters, dont_ignore_glass, ENT(pev), &result);
@@ -301,7 +318,6 @@ bool CCSBot::LearnStep()
 				if (result.flFraction == 1.0f && !result.fStartSolid)
 				{
 					// the trace didnt hit anything - clear
-					float toGround = to.z;
 					float fromGround = from.z;
 
 					float epsilon = 0.1f;
