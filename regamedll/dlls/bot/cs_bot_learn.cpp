@@ -214,6 +214,28 @@ bool CCSBot::LearnStep()
 					break;
 			}
 
+#ifdef REGAMEDLL_ADD
+			// restart the search from other player spawns
+			// this is helpful in maps where the the enemy team spawn cannot be accessed
+			for(auto classname : {"info_player_start", "info_player_deathmatch", "info_vip_start"}) {
+				if(m_currentNode)
+					break;
+
+				CBaseEntity* pSpawn = nullptr;
+				while((pSpawn = UTIL_FindEntityByClassname(pSpawn, classname)) && !FNullEnt(pSpawn->edict())) {
+					Vector pos = pSpawn->pev->origin;
+					SnapToGrid(&pos.x);
+					SnapToGrid(&pos.y);
+					Vector normal;
+					if(!GetGroundHeight(&pos, &pos.z, &normal) || CNavNode::GetNode(&pos))
+						continue;
+
+					m_currentNode = new CNavNode(&pos, &normal);
+					break;
+				}
+			}
+#endif
+
 			if (!m_currentNode)
 			{
 				// all seeds exhausted, sampling complete
