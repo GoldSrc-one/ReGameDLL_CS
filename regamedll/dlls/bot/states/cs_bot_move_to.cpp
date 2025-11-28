@@ -258,6 +258,16 @@ void MoveToState::OnUpdate(CCSBot *me)
 		}
 		break;
 	}
+#ifdef REGAMEDLL_ADD
+	default:
+	{
+		CBaseEntity* pGoal = me->GetGoalEntity<CBaseEntity>();
+		if(!pGoal || (me->IsVisible(&m_goalPosition, false) && pGoal->pev->origin != m_goalPosition)) {
+			me->Idle();
+			return;
+		}
+	}
+#endif
 	}
 
 	if (me->UpdatePathMovement() != CCSBot::PROGRESSING)
