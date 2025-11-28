@@ -1125,7 +1125,18 @@ void ConnectGeneratedAreas()
 				}
 				else
 				{
+#ifdef REGAMEDLL_FIXES
+					// I think we should be looking from the edge node.
+					// For north&west, the "node" is the edge node
+					// but for south&east, the "node" is actually 1 step away from the edge.
+					// This matters when the area is sloped.
+					// If the slope is up, "node" might be too low for the crouch jump limit.
+					// If the slope is down, "node" might be too high for the death drop limit.
+					// So instead I'm using "adj", which sits on the edge of the area.
+					CNavArea* downArea = findJumpDownArea(adj->GetPosition(), SOUTH);
+#else
 					CNavArea *downArea = findJumpDownArea(node->GetPosition(), SOUTH);
+#endif
 					if (downArea && downArea != area)
 						area->ConnectTo(downArea, SOUTH);
 				}
@@ -1148,7 +1159,12 @@ void ConnectGeneratedAreas()
 				}
 				else
 				{
+#ifdef REGAMEDLL_FIXES
+					// Please see the explanation in south edge fix
+					CNavArea* downArea = findJumpDownArea(adj->GetPosition(), EAST);
+#else
 					CNavArea *downArea = findJumpDownArea(node->GetPosition(), EAST);
+#endif
 					if (downArea && downArea != area)
 						area->ConnectTo(downArea, EAST);
 				}
