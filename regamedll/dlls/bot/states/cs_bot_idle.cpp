@@ -865,40 +865,28 @@ void IdleState::OnUpdate(CCSBot *me)
 	{
 #ifdef REGAMEDLL_ADD
 		if(cv_bot_goal.string && !FStrEq(cv_bot_goal.string, "")) {
-			//compute goal distances
-			float distanceSum = 0;
-			bool goalOnMe = false;
-			{
-				CBaseEntity* pGoal = nullptr;
-				while((pGoal = UTIL_FindEntityByClassname(pGoal, cv_bot_goal.string)) && !FNullEnt(pGoal->edict())) {
-					if(pGoal->pev->aiment == me->edict()) {
-						goalOnMe = true;
-						continue;
-					}
+			//count the goals
+			int numGoals = 0;
+			CBaseEntity* pGoal = nullptr;
+			while((pGoal = UTIL_FindEntityByClassname(pGoal, cv_bot_goal.string)) && !FNullEnt(pGoal->edict()))
+				if(!pGoal->pev->owner || pGoal->pev->owner == me->edict())
+					numGoals++;
 
-					distanceSum += (pGoal->pev->origin - me->pev->origin).Length();
-				}
-			}
+			//pick a random goal
+			int randomGoal = RANDOM_LONG(0, numGoals - 1);
+			while((pGoal = UTIL_FindEntityByClassname(pGoal, cv_bot_goal.string)) && !FNullEnt(pGoal->edict())) {
+				if(!pGoal->pev->owner || pGoal->pev->owner == me->edict())
+					randomGoal--;
 
-			//pick a random goal, the more distant are more probable
-			if(distanceSum > 0) {
-				float randomGoalDistance = RANDOM_FLOAT(0, distanceSum);
-				CBaseEntity* pGoal = nullptr;
-				while((pGoal = UTIL_FindEntityByClassname(pGoal, cv_bot_goal.string)) && !FNullEnt(pGoal->edict())) {
-					if(pGoal->pev->aiment == me->edict())
-						continue;
+				if(randomGoal >= 0)
+					continue;
 
-					randomGoalDistance -= (pGoal->pev->origin - me->pev->origin).Length();
-					if(randomGoalDistance > 0)
-						continue;
-
-					me->SetGoalEntity(pGoal);
-					me->MoveTo(&pGoal->pev->origin, goalOnMe ? RouteType::FASTEST_ROUTE : RouteType::SAFEST_ROUTE);
-					me->Run();
-					me->SetDisposition(goalOnMe ? CCSBot::SELF_DEFENSE : CCSBot::OPPORTUNITY_FIRE);
-					me->PrintIfWatched(goalOnMe ? "I'm running away with the goal!\n" : "I'm going for the goal!\n");
-					return;
-				}
+				me->SetGoalEntity(pGoal);
+				me->MoveTo(&pGoal->pev->origin);
+				me->Run();
+				me->SetDisposition(CCSBot::OPPORTUNITY_FIRE);
+				me->PrintIfWatched("I'm going for the goal!\n");
+				return;
 			}
 		}
 #endif
