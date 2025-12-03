@@ -252,13 +252,6 @@ bool IsIntersectingBox(const Vector &start, const Vector &end, const Vector &box
 // When bot is touched by another entity.
 void CCSBot::BotTouch(CBaseEntity *pOther)
 {
-#if REGAMEDLL_ADD
-	if(pOther == GetGoalEntity()) {
-		SetGoalEntity(nullptr);
-		Idle();
-	}
-#endif
-
 	// if we have touched a higher-priority player, make way
 	// TODO: Need to account for reaction time, etc.
 	if (pOther->IsPlayer())
