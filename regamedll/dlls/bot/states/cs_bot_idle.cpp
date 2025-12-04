@@ -873,20 +873,22 @@ void IdleState::OnUpdate(CCSBot *me)
 					numGoals++;
 
 			//pick a random goal
-			int randomGoal = RANDOM_LONG(0, numGoals - 1);
-			while((pGoal = UTIL_FindEntityByClassname(pGoal, cv_bot_goal.string)) && !FNullEnt(pGoal->edict())) {
-				if(!pGoal->pev->owner || pGoal->pev->owner == me->edict())
-					randomGoal--;
+			if(numGoals > 0) {
+				int randomGoal = RANDOM_LONG(0, numGoals - 1);
+				while((pGoal = UTIL_FindEntityByClassname(pGoal, cv_bot_goal.string)) && !FNullEnt(pGoal->edict())) {
+					if(!pGoal->pev->owner || pGoal->pev->owner == me->edict())
+						randomGoal--;
 
-				if(randomGoal >= 0)
-					continue;
+					if(randomGoal >= 0)
+						continue;
 
-				me->SetGoalEntity(pGoal);
-				me->MoveTo(&pGoal->pev->origin);
-				me->Run();
-				me->SetDisposition(CCSBot::OPPORTUNITY_FIRE);
-				me->PrintIfWatched("I'm going for the goal!\n");
-				return;
+					me->SetGoalEntity(pGoal);
+					me->MoveTo(&pGoal->pev->origin);
+					me->Run();
+					me->SetDisposition(CCSBot::OPPORTUNITY_FIRE);
+					me->PrintIfWatched("I'm going for the goal!\n");
+					return;
+				}
 			}
 		}
 #endif
