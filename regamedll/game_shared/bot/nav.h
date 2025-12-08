@@ -52,7 +52,12 @@ typedef unsigned int Place;
 
 #define WALK_THRU_DOORS      0x01
 #define WALK_THRU_BREAKABLES 0x02
+#ifdef REGAMEDLL_ADD
+#define WALK_THRU_WALLS      0x04
+#define WALK_THRU_EVERYTHING (WALK_THRU_DOORS | WALK_THRU_BREAKABLES | WALK_THRU_WALLS)
+#else
 #define WALK_THRU_EVERYTHING (WALK_THRU_DOORS | WALK_THRU_BREAKABLES)
+#endif
 
 enum NavErrorType
 {
@@ -386,6 +391,11 @@ inline bool IsEntityWalkable(entvars_t *pev, unsigned int flags)
 	// if we hit a breakable object, assume its walkable because we will shoot it when we touch it
 	else if (FClassnameIs(pev, "func_breakable") && pev->takedamage == DAMAGE_YES)
 		return (flags & WALK_THRU_BREAKABLES) ? true : false;
+
+#ifdef REGAMEDLL_ADD
+	else if (FClassnameIs(pev, "func_wall_toggle"))
+		return (flags & WALK_THRU_WALLS) ? true : false;
+#endif
 
 	return false;
 }
