@@ -651,10 +651,11 @@ void CNavArea::FinishSplitEdit(CNavArea *newArea, NavDirType ignoreEdge)
 				if (newArea->IsOverlappingX(adj))
 				{
 					newArea->ConnectTo(adj, (NavDirType)d);
-
+#ifndef REGAMEDLL_FIXES
 					// add reciprocal connection if needed
 					if (adj->IsConnected(this, OppositeDirection((NavDirType)d)))
 						adj->ConnectTo(newArea, OppositeDirection((NavDirType)d));
+#endif
 				}
 				break;
 
@@ -663,15 +664,49 @@ void CNavArea::FinishSplitEdit(CNavArea *newArea, NavDirType ignoreEdge)
 				if (newArea->IsOverlappingY(adj))
 				{
 					newArea->ConnectTo(adj, (NavDirType)d);
-
+#ifndef REGAMEDLL_FIXES
 					// add reciprocal connection if needed
 					if (adj->IsConnected(this, OppositeDirection((NavDirType)d)))
 						adj->ConnectTo(newArea, OppositeDirection((NavDirType)d));
+#endif
 				}
 				break;
 			}
 		}
 	}
+
+#ifdef REGAMEDLL_FIXES
+	// add reciprocal connections if needed
+	for(NavAreaList::iterator areaIter = TheNavAreaList.begin(); areaIter != TheNavAreaList.end(); areaIter++) {
+		CNavArea* area = *areaIter;
+
+		if(area == this)
+			continue;
+
+		for(int d = 0; d < NUM_DIRECTIONS; d++) {
+			if(d == OppositeDirection(ignoreEdge))
+				continue;
+
+			int count = area->GetAdjacentCount((NavDirType)d);
+			for(int a = 0; a < count; a++) {
+				CNavArea* adj = area->GetAdjacentArea((NavDirType)d, a);
+				if(adj != this)
+					continue;
+
+				switch(d) {
+				case NORTH:
+				case SOUTH:
+					if(area->IsOverlappingX(newArea))
+						area->ConnectTo(newArea, (NavDirType)d);
+				case EAST:
+				case WEST:
+					if(area->IsOverlappingY(newArea))
+						area->ConnectTo(newArea, (NavDirType)d);
+				}
+			}
+		}
+	}
+#endif
 
 	TheNavAreaList.push_back(newArea);
 	TheNavAreaGrid.AddNavArea(newArea);
