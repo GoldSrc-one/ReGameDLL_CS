@@ -78,7 +78,7 @@ inline CNavNode *LadderEndSearch(CBaseEntity *pEntity, const Vector *pos, NavDir
 	return nullptr;
 }
 
-CNavNode *CCSBot::AddNode(const Vector *destPos, const Vector *normal, NavDirType dir, CNavNode *source)
+CNavNode *CCSBot::AddNode(const Vector *destPos, const Vector *normal, NavDirType dir, CNavNode *source, bool disconnected)
 {
 	// check if a node exists at this location
 	CNavNode *node = const_cast<CNavNode *>(CNavNode::GetNode(destPos));
@@ -92,11 +92,12 @@ CNavNode *CCSBot::AddNode(const Vector *destPos, const Vector *normal, NavDirTyp
 	}
 
 	// connect source node to new node
+	if(!disconnected)
 	source->ConnectTo(node, dir);
 
 	// optimization: if deltaZ changes very little, assume connection is commutative
 	const float zTolerance = 10.0f; // 50.0f;
-	if (Q_fabs(source->GetPosition()->z - destPos->z) < zTolerance)
+	if (!disconnected && Q_fabs(source->GetPosition()->z - destPos->z) < zTolerance)
 	{
 		node->ConnectTo(source, OppositeDirection(dir));
 		node->MarkAsVisited(OppositeDirection(dir));
@@ -304,6 +305,7 @@ bool CCSBot::LearnStep()
 				UTIL_TraceLine(fromOrigin, toOrigin, ignore_monsters, dont_ignore_glass, ENT(pev), &result);
 
 				bool walkable;
+				bool disconnected = false;
 
 				if (result.flFraction == 1.0f && !result.fStartSolid)
 				{
@@ -367,6 +369,10 @@ bool CCSBot::LearnStep()
 					if (IsEntityWalkable(VARS(result.pHit), WALK_THRU_EVERYTHING))
 					{
 						walkable = true;
+#ifdef REGAMEDLL_ADD
+						if((FClassnameIs(VARS(result.pHit), "func_door") || FClassnameIs(VARS(result.pHit), "func_door_rotating")) && VARS(result.pHit)->targetname)
+							disconnected = true;
+#endif
 					}
 					else
 					{
@@ -385,7 +391,7 @@ bool CCSBot::LearnStep()
 				{
 					// we can move here
 					// create a new navigation node, and update current node pointer
-					CNavNode *newNode = AddNode(&to, &toNormal, m_generationDir, m_currentNode);
+					CNavNode *newNode = AddNode(&to, &toNormal, m_generationDir, m_currentNode, disconnected);
 				}
 
 				return true;

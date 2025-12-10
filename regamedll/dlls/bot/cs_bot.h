@@ -1005,7 +1005,7 @@ private:
 	CountdownTimer m_booTimer;
 	CountdownTimer m_relocateTimer;
 
-	CNavNode *AddNode(const Vector *destPos, const Vector *normal, NavDirType dir, CNavNode *source);
+	CNavNode *AddNode(const Vector *destPos, const Vector *normal, NavDirType dir, CNavNode *source, bool disconnected = false);
 	void StartLearnProcess();
 	void UpdateLearnProcess();
 	bool LearnStep();

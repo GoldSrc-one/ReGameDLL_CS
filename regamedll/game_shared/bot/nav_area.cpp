@@ -1085,6 +1085,35 @@ inline bool testJumpDown(const Vector *fromPos, const Vector *toPos)
 	return true;
 }
 
+inline bool testOneWayDoor(const Vector* fromPos, const Vector* toPos) {
+	Vector from(fromPos->x, fromPos->y, fromPos->z + HumanHeight);
+	Vector to(toPos->x, toPos->y, toPos->z + HumanHeight);
+
+	TraceResult result;
+	UTIL_TraceLine(from, to, ignore_monsters, nullptr, &result);
+	if(result.flFraction == 1.0f && !result.fStartSolid)
+		return false;
+
+	if(!FClassnameIs(result.pHit, "func_door") && !FClassnameIs(result.pHit, "func_door_rotating"))
+		return false;
+
+	auto targetname = VARS(result.pHit)->targetname;
+	if(!targetname)
+		return false;
+
+	CBaseEntity* pTrigger = nullptr;
+	while((pTrigger = UTIL_FindEntityByClassname(pTrigger, "trigger_multiple")) && !FNullEnt(pTrigger->edict())) {
+		Vector triggerMins = pTrigger->pev->mins + pTrigger->pev->origin + VEC_HULL_MIN;
+		Vector triggerMaxs = pTrigger->pev->maxs + pTrigger->pev->origin + VEC_HULL_MAX;
+
+		if(triggerMins.x <= from.x && triggerMaxs.x >= from.x &&
+		   triggerMins.y <= from.y && triggerMaxs.y >= from.y &&
+		   triggerMins.z <= from.z && triggerMaxs.z >= from.z)
+			return true;
+	}
+	return false;
+}
+
 inline CNavArea *findJumpDownArea(const Vector *fromPos, NavDirType dir)
 {
 	Vector start(fromPos->x, fromPos->y, fromPos->z + HalfHumanHeight);
@@ -1094,6 +1123,9 @@ inline CNavArea *findJumpDownArea(const Vector *fromPos, NavDirType dir)
 	CNavArea *downArea = FindFirstAreaInDirection(&start, dir, 4.0f * GenerationStepSize, DeathDrop, nullptr, &toPos);
 
 	if (downArea && testJumpDown(fromPos, &toPos))
+		return downArea;
+
+	if (downArea && testOneWayDoor(fromPos, &toPos))
 		return downArea;
 
 	return nullptr;
