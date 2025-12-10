@@ -1023,8 +1023,13 @@ inline CNavArea *FindFirstAreaInDirection(const Vector *start, NavDirType dir, f
 		else
 			UTIL_TraceLine(*start, pos, ignore_monsters, nullptr, &result);
 
+#ifdef REGAMEDLL_FIXES
+		if((result.flFraction != 1.0f || result.fStartSolid) && !IsEntityWalkable(VARS(result.pHit), WALK_THRU_EVERYTHING))
+			break;
+#else
 		if (result.flFraction != 1.0f)
 			break;
+#endif
 
 		area = TheNavAreaGrid.GetNavArea(&pos, beneathLimit);
 
