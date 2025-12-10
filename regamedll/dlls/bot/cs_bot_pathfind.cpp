@@ -725,7 +725,7 @@ int CCSBot::FindOurPositionOnPath(Vector *close, bool local) const
 		{
 			// don't use points we cant see
 			Vector probe = pos + Vector(0, 0, HalfHumanHeight);
-			if (!IsWalkableTraceLineClear(eyes, probe, WALK_THRU_EVERYTHING))
+			if (!IsWalkableTraceLineClear(eyes, probe, WALK_THRU_DOORS | WALK_THRU_BREAKABLES))
 				continue;
 
 			// don't use points we cant reach
@@ -1209,7 +1209,7 @@ void CCSBot::FeelerReflexAdjustment(Vector *goalPosition)
 	Vector from = feet + feelerOffset * lat;
 	Vector to = from + feelerLength * dir;
 
-	bool leftClear = IsWalkableTraceLineClear(from, to, WALK_THRU_EVERYTHING);
+	bool leftClear = IsWalkableTraceLineClear(from, to, WALK_THRU_DOORS | WALK_THRU_BREAKABLES);
 
 	// avoid ledges, too
 	// use 'from' so it doesn't interfere with legitimate gap jumping (its at our feet)
@@ -1234,7 +1234,7 @@ void CCSBot::FeelerReflexAdjustment(Vector *goalPosition)
 	from = feet - feelerOffset * lat;
 	to = from + feelerLength * dir;
 
-	bool rightClear = IsWalkableTraceLineClear(from, to, WALK_THRU_EVERYTHING);
+	bool rightClear = IsWalkableTraceLineClear(from, to, WALK_THRU_DOORS | WALK_THRU_BREAKABLES);
 
 /*
 	// avoid ledges, too
