@@ -4437,6 +4437,11 @@ bool GetGroundHeight(const Vector *pos, float *height, Vector *normal)
 
 		if (result.flFraction != 1.0f && result.pHit)
 		{
+#ifdef REGAMEDLL_ADD
+			if(FClassnameIs(VARS(result.pHit), "trigger_hurt"))
+				return false;
+#endif
+
 			// ignoring any entities that we can walk through
 			if (IsEntityWalkable(VARS(result.pHit), WALK_THRU_EVERYTHING))
 			{
