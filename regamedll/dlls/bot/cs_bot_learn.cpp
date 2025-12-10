@@ -93,7 +93,7 @@ CNavNode *CCSBot::AddNode(const Vector *destPos, const Vector *normal, NavDirTyp
 
 	// connect source node to new node
 	if(!disconnected)
-	source->ConnectTo(node, dir);
+		source->ConnectTo(node, dir);
 
 	// optimization: if deltaZ changes very little, assume connection is commutative
 	const float zTolerance = 10.0f; // 50.0f;
@@ -172,6 +172,31 @@ void CCSBot::StartLearnProcess()
 	startProgressMeter("#CZero_LearningMap");
 	drawProgressMeter(0, "#CZero_LearningMap");
 	BuildLadders();
+
+#ifdef REGAMEDLL_ADD
+	//make illusionaries solid for the duration of learning
+	CBaseEntity* pIllusionary = nullptr;
+	while((pIllusionary = UTIL_FindEntityByClassname(pIllusionary, "func_illusionary")) && !FNullEnt(pIllusionary->edict())) {
+		auto center = (pIllusionary->pev->mins + pIllusionary->pev->maxs) / 2.f + pIllusionary->pev->origin;
+		TraceResult trace;
+		UTIL_TraceHull(center, center, ignore_monsters, head_hull, 0, &trace);
+
+		if(trace.fStartSolid || trace.fAllSolid || !trace.fInOpen) {
+			pIllusionary->pev->solid = SOLID_BSP;
+			pIllusionary->pev->movetype = MOVETYPE_PUSH;
+			UTIL_SetOrigin(pIllusionary->pev, pIllusionary->pev->origin);
+		}
+	}
+	//make hurts solid for the duration of learning
+	CBaseEntity* pHurt = nullptr;
+	while((pHurt = UTIL_FindEntityByClassname(pHurt, "trigger_hurt")) && !FNullEnt(pHurt->edict())) {
+		if(pHurt->pev->solid) {
+			pHurt->pev->solid = SOLID_BSP;
+			pHurt->pev->movetype = MOVETYPE_PUSH;
+			UTIL_SetOrigin(pHurt->pev, pHurt->pev->origin);
+		}
+	}
+#endif
 
 	Vector normal;
 	Vector pos = pev->origin;
@@ -522,6 +547,20 @@ void CCSBot::UpdateSaveProcess()
 	Q_snprintf(msg, sizeof(msg), "Navigation file '%s' saved.", filename);
 	HintMessageToAllPlayers(msg);
 	CONSOLE_ECHO("%s\n", msg);
+
+#ifdef REGAMEDLL_ADD
+	//make illusionariers non-solid again
+	CBaseEntity* pIllusionary = nullptr;
+	while((pIllusionary = UTIL_FindEntityByClassname(pIllusionary, "func_illusionary")) && !FNullEnt(pIllusionary->edict()))
+		if(pIllusionary->pev->solid)
+			pIllusionary->Spawn();
+
+	//make hurts trigger again
+	CBaseEntity* pHurt = nullptr;
+	while((pHurt = UTIL_FindEntityByClassname(pHurt, "trigger_hurt")) && !FNullEnt(pHurt->edict()))
+		if(pHurt->pev->solid)
+			pHurt->Spawn();
+#endif
 
 	hideProgressMeter();
 	StartNormalProcess();
