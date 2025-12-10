@@ -53,8 +53,8 @@ typedef unsigned int Place;
 #define WALK_THRU_DOORS      0x01
 #define WALK_THRU_BREAKABLES 0x02
 #ifdef REGAMEDLL_ADD
-#define WALK_THRU_WALLS      0x04
-#define WALK_THRU_EVERYTHING (WALK_THRU_DOORS | WALK_THRU_BREAKABLES | WALK_THRU_WALLS)
+#define WALK_THRU_TOGGLE_WALLS 0x04
+#define WALK_THRU_EVERYTHING (WALK_THRU_DOORS | WALK_THRU_BREAKABLES | WALK_THRU_TOGGLE_WALLS)
 #else
 #define WALK_THRU_EVERYTHING (WALK_THRU_DOORS | WALK_THRU_BREAKABLES)
 #endif
@@ -394,7 +394,7 @@ inline bool IsEntityWalkable(entvars_t *pev, unsigned int flags)
 
 #ifdef REGAMEDLL_ADD
 	else if (FClassnameIs(pev, "func_wall_toggle"))
-		return (flags & WALK_THRU_WALLS) ? true : false;
+		return (flags & WALK_THRU_TOGGLE_WALLS) ? true : false;
 #endif
 
 	return false;
