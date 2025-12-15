@@ -1390,11 +1390,51 @@ inline bool IsAreaRoughlySquare(const class CNavArea *area)
 	return true;
 }
 
+#ifdef REGAMEDLL_ADD
+//reduce excessive splitting
+inline bool IsSplittingNecessary(const class CNavArea* area, bool splitAlongX) {
+	for(int d = 0; d < NUM_DIRECTIONS; d++) {
+		//don't split if there are no connections from the long side
+		if(splitAlongX && (d == NORTH || d == SOUTH))
+			continue;
+
+		if(!splitAlongX && (d == EAST || d == WEST))
+			continue;
+
+		int count = area->GetAdjacentCount((NavDirType)d);
+		for(int a = 0; a < count; a++) {
+			CNavArea* adj = area->GetAdjacentArea((NavDirType)d, a);
+
+			bool misaligned = false;
+
+			//don't split if the the connected area lines up along the long side
+			if(splitAlongX) {
+				misaligned |= Q_abs(area->GetExtent()->lo.y - adj->GetExtent()->lo.y) > GenerationStepSize;
+				misaligned |= Q_abs(area->GetExtent()->hi.y - adj->GetExtent()->hi.y) > GenerationStepSize;
+			}
+			else {
+				misaligned |= Q_abs(area->GetExtent()->lo.x - adj->GetExtent()->lo.x) > GenerationStepSize;
+				misaligned |= Q_abs(area->GetExtent()->hi.x - adj->GetExtent()->hi.x) > GenerationStepSize;
+			}
+
+			if(misaligned)
+				return true;
+		}
+	}
+	return false;
+}
+#endif
+
 // Recursively chop area in half along X until child areas are roughly square
 void SplitX(CNavArea *area)
 {
 	if (IsAreaRoughlySquare(area))
 		return;
+
+#ifdef REGAMEDLL_ADD
+	if(!IsSplittingNecessary(area, false))
+		return;
+#endif
 
 	float split = area->GetSizeX();
 	split /= 2.0f;
@@ -1422,6 +1462,11 @@ void SplitY(CNavArea *area)
 {
 	if (IsAreaRoughlySquare(area))
 		return;
+
+#ifdef REGAMEDLL_ADD
+	if(!IsSplittingNecessary(area, true))
+		return;
+#endif
 
 	float split = area->GetSizeY();
 	split /= 2.0f;
