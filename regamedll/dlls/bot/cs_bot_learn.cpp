@@ -395,8 +395,24 @@ bool CCSBot::LearnStep()
 					{
 						walkable = true;
 #ifdef REGAMEDLL_ADD
-						if((FClassnameIs(VARS(result.pHit), "func_door") || FClassnameIs(VARS(result.pHit), "func_door_rotating")) && VARS(result.pHit)->targetname)
-							disconnected = true;
+						if((FClassnameIs(VARS(result.pHit), "func_door") || FClassnameIs(VARS(result.pHit), "func_door_rotating")) && VARS(result.pHit)->targetname) {
+							auto doorMins = VARS(result.pHit)->mins + VARS(result.pHit)->origin;
+							auto doorMaxs = VARS(result.pHit)->maxs + VARS(result.pHit)->origin;
+							auto doorCenter = (doorMins + doorMaxs) / 2.f;
+							auto doorRadius = (doorCenter - doorMins).Length();
+
+							CBaseEntity* pTrigger = nullptr;
+							while((pTrigger = UTIL_FindEntityInSphere(pTrigger, doorCenter, doorRadius)) && !FNullEnt(pTrigger->edict())) {
+								if(pTrigger->pev->classname == "trigger_multiple") {
+									auto triggerMins = pTrigger->pev->mins + pTrigger->pev->origin;
+									auto triggerMaxs = pTrigger->pev->maxs + pTrigger->pev->origin;
+									auto triggerCenter = (triggerMins + triggerMaxs) / 2.f;
+									if(triggerCenter.x <= doorMins.x || triggerCenter.x >= doorMaxs.x ||
+									   triggerCenter.y <= doorMins.y || triggerCenter.y >= doorMaxs.y)
+										disconnected = true;
+								}
+							}
+						}
 #endif
 					}
 					else
