@@ -127,6 +127,12 @@ CNavNode *CCSBot::AddNode(const Vector *destPos, const Vector *normal, NavDirTyp
 
 			if (result.flFraction != 1.0f)
 			{
+#ifdef REGAMEDLL_FIXES
+				float hitZ = floor.z * (1.f - result.flFraction) + ceiling.z * result.flFraction;
+				if(hitZ - destPos->z < 36.0f - epsilon)
+					continue; //cannot fit under that!
+#endif
+
 				crouch = true;
 				break;
 			}
