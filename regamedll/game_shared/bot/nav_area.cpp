@@ -1880,6 +1880,20 @@ void MarkJumpAreas()
 
 		if (normal.z < MaxUnitZSlope)
 			area->SetAttributes(area->GetAttributes() | NAV_JUMP);
+
+#ifdef REGAMEDLL_FIXES
+		//try the opposite corner too
+		u.x = -u.x;
+		u.z = area->m_swZ - area->m_extent.hi.z;
+
+		v.y = -v.y;
+		v.z = area->m_neZ - area->m_extent.hi.z;
+
+		Vector normal2 = CrossProduct(u, v);
+		normal2.NormalizeInPlace();
+		if(normal2.z < MaxUnitZSlope)
+			area->SetAttributes(area->GetAttributes() | NAV_JUMP);
+#endif
 	}
 }
 
