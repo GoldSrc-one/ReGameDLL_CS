@@ -1373,7 +1373,8 @@ bool CCSBotManager::LoadNavigationMap()
 	DetermineMapScenario();
 
 #ifdef REGAMEDLL_ADD
-	GenerateSpawnPointsFromNavData();
+	if(randomspawn.value > 0)
+		GenerateSpawnPointsFromNavData();
 #endif
 
 	return true;
