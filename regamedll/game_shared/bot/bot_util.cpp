@@ -426,9 +426,6 @@ CBasePlayer *UTIL_GetLocalPlayer()
 			if (pPlayer->IsBot())
 				continue;
 
-			if (pPlayer->m_iTeam != TERRORIST && pPlayer->m_iTeam != CT)
-				continue;
-
 			if (pPlayer->m_iJoiningState != JOINED)
 				continue;
 
