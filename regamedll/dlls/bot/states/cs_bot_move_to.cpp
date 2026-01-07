@@ -261,10 +261,12 @@ void MoveToState::OnUpdate(CCSBot *me)
 #ifdef REGAMEDLL_ADD
 	default:
 	{
-		CBaseEntity* pGoal = me->GetGoalEntity<CBaseEntity>();
-		if(!pGoal || (me->IsVisible(&m_goalPosition, false) && pGoal->pev->origin != m_goalPosition)) {
-			me->Idle();
-			return;
+		if(cv_bot_goal.string && !FStrEq(cv_bot_goal.string, "")) {
+			CBaseEntity* pGoal = me->GetGoalEntity<CBaseEntity>();
+			if(!pGoal || (me->IsVisible(&m_goalPosition, false) && pGoal->pev->origin != m_goalPosition)) {
+				me->Idle();
+				return;
+			}
 		}
 	}
 #endif
