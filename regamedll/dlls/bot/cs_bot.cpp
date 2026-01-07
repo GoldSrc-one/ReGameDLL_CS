@@ -289,11 +289,28 @@ void CCSBot::BotTouch(CBaseEntity *pOther)
 		return;
 	}
 
-	// If we won't be able to break it, don't try
-	if (pOther->pev->takedamage != DAMAGE_YES)
+	if(IsAttacking())
 		return;
 
-	if (IsAttacking())
+#ifdef REGAMEDLL_ADD
+	if(pOther->pev->targetname && (FClassnameIs(pOther->pev, "func_door") || FClassnameIs(pOther->pev, "func_door_rotating") || FClassnameIs(pOther->pev, "func_plat") || FClassnameIs(pOther->pev, "func_platrot"))) {
+		if(gpGlobals->time - pOther->pev->nextthink > 5.0f) {
+			CBaseEntity* pButton = nullptr;
+			while((pButton = UTIL_FindEntityByString(pButton, "target", pOther->pev->targetname)) && !FNullEnt(pButton->edict())) {
+				if(FClassnameIs(pButton->pev, "func_button") || FClassnameIs(pButton->pev, "func_rot_button")) {
+					Vector center = (pButton->pev->absmax + pButton->pev->absmin) / 2.0f;
+					MoveTowardsPosition(&center);
+					SetLookAt("Button", &center, PRIORITY_HIGH, 0.2, 0, 5.0);
+					UseEnvironment();
+					return;
+				}
+			}
+		}
+	}
+#endif
+
+	// If we won't be able to break it, don't try
+	if (pOther->pev->takedamage != DAMAGE_YES)
 		return;
 
 	// See if it's breakable
