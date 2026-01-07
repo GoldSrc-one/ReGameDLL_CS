@@ -428,6 +428,21 @@ bool CCSBot::StayOnNavMesh()
 	{
 		Vector pos;
 		goalArea->GetClosestPointOnArea(&pev->origin, &pos);
+#ifdef REGAMEDLL_ADD
+		if(!IsWalkableTraceLineClear(pev->origin, pos)) {
+			Vector randomDir;
+			randomDir.x = RANDOM_FLOAT(-1024, 1024);
+			randomDir.y = RANDOM_FLOAT(-1024, 1024);
+			randomDir.z = RANDOM_FLOAT(-512, 256);
+			TraceResult trace;
+			UTIL_TraceLine(pev->origin, pev->origin + randomDir, ignore_monsters, edict(), &trace);
+			if(trace.flFraction < 1.0) {
+				auto hitArea = TheNavAreaGrid.GetNearestNavArea(&trace.vecEndPos);
+				if(hitArea)
+					hitArea->GetClosestPointOnArea(&trace.vecEndPos, &pos);
+			}
+		}
+#endif
 
 		// move point into area
 		Vector to = pos - pev->origin;
