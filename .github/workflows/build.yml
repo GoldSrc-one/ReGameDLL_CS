@@ -1,4 +1,6 @@
 name: C/C++ CI
+permissions:
+  contents: write
 
 on:
   push:
@@ -157,8 +159,9 @@ jobs:
           startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            mp.dll
-            mp.pdb
+            *.dll
+            *.pdb
+
         env:
           GITHUB_TOKEN: ${{ secrets.API_TOKEN }}
 
