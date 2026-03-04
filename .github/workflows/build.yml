@@ -159,8 +159,8 @@ jobs:
           startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            *.dll
-            *.pdb
+            bin/win32/cstrike/dlls/mp.dll
+            debug/mp.pdb
 
         env:
           GITHUB_TOKEN: ${{ secrets.API_TOKEN }}
