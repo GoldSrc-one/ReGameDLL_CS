@@ -173,6 +173,29 @@ void hideProgressMeter()
 	MESSAGE_END();
 }
 
+inline static bool IsIllusionarySolid(CBaseEntity* pIllusionary) {
+	const auto mins = pIllusionary->pev->mins + pIllusionary->pev->origin - VEC_DUCK_HULL_MIN;
+	const auto maxs = pIllusionary->pev->maxs + pIllusionary->pev->origin - VEC_DUCK_HULL_MAX;
+
+	Vector probe = (mins + maxs) / 2.f;
+	TraceResult trace;
+	UTIL_TraceHull(probe, probe, ignore_monsters, head_hull, 0, &trace);
+	if(trace.fStartSolid || trace.fAllSolid || !trace.fInOpen)
+		return true;
+
+	const auto step = VEC_DUCK_HULL_MAX - VEC_DUCK_HULL_MIN;
+	for(probe.x = mins.x; probe.x < maxs.x; probe.x += step.x) {
+		for(probe.y = mins.y; probe.y < maxs.y; probe.y += step.y) {
+			for(probe.z = mins.z; probe.z < maxs.z; probe.z += step.z) {
+				UTIL_TraceHull(probe, probe, ignore_monsters, head_hull, 0, &trace);
+				if(trace.fStartSolid || trace.fAllSolid || !trace.fInOpen)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
 void CCSBot::StartLearnProcess()
 {
 	startProgressMeter("#CZero_LearningMap");
@@ -183,11 +206,7 @@ void CCSBot::StartLearnProcess()
 	//make illusionaries solid for the duration of learning
 	CBaseEntity* pIllusionary = nullptr;
 	while((pIllusionary = UTIL_FindEntityByClassname(pIllusionary, "func_illusionary")) && !FNullEnt(pIllusionary->edict())) {
-		auto center = (pIllusionary->pev->mins + pIllusionary->pev->maxs) / 2.f + pIllusionary->pev->origin;
-		TraceResult trace;
-		UTIL_TraceHull(center, center, ignore_monsters, head_hull, 0, &trace);
-
-		if(trace.fStartSolid || trace.fAllSolid || !trace.fInOpen) {
+		if(IsIllusionarySolid(pIllusionary)) {
 			pIllusionary->pev->solid = SOLID_BSP;
 			pIllusionary->pev->movetype = MOVETYPE_PUSH;
 			UTIL_SetOrigin(pIllusionary->pev, pIllusionary->pev->origin);
@@ -196,11 +215,16 @@ void CCSBot::StartLearnProcess()
 	//make hurts solid for the duration of learning
 	CBaseEntity* pHurt = nullptr;
 	while((pHurt = UTIL_FindEntityByClassname(pHurt, "trigger_hurt")) && !FNullEnt(pHurt->edict())) {
-		if(pHurt->pev->solid) {
-			pHurt->pev->solid = SOLID_BSP;
-			pHurt->pev->movetype = MOVETYPE_PUSH;
-			UTIL_SetOrigin(pHurt->pev, pHurt->pev->origin);
-		}
+		//skip hurts with unknown spawnflags
+		if(pHurt->pev->spawnflags > SF_TRIGGER_HURT_CLIENTONLYTOUCH)
+			continue;
+
+		if(!pHurt->pev->solid)
+			continue;
+
+		pHurt->pev->solid = SOLID_BSP;
+		pHurt->pev->movetype = MOVETYPE_PUSH;
+		UTIL_SetOrigin(pHurt->pev, pHurt->pev->origin);
 	}
 #endif
 
@@ -281,28 +305,19 @@ bool CCSBot::LearnStep()
 		{
 			if (!m_currentNode->HasVisited((NavDirType)dir))
 			{
+				m_generationDir = (NavDirType)dir;
+
 				float feetOffset = pev->origin.z - GetFeetZ();
 
 				// start at current node position
 				Vector pos = *m_currentNode->GetPosition();
 
 				// snap to grid
-				int cx = SnapToGrid(pos.x);
-				int cy = SnapToGrid(pos.y);
+				pos.x = SnapToGrid(pos.x);
+				pos.y = SnapToGrid(pos.y);
 
 				// attempt to move to adjacent node
-				switch (dir)
-				{
-				case NORTH: cy -= GenerationStepSize; break;
-				case SOUTH: cy += GenerationStepSize; break;
-				case EAST:  cx += GenerationStepSize; break;
-				case WEST:  cx -= GenerationStepSize; break;
-				}
-
-				pos.x = cx;
-				pos.y = cy;
-
-				m_generationDir = (NavDirType)dir;
+				AddDirectionVector(&pos, m_generationDir, GenerationStepSize);
 
 				// mark direction as visited
 				m_currentNode->MarkAsVisited(m_generationDir);
@@ -434,6 +449,27 @@ bool CCSBot::LearnStep()
 					walkable = false;
 				}
 #endif
+
+#ifdef REGAMEDLL_ADD
+				if(walkable) {
+					Vector probeTo = to - VEC_DUCK_HULL_MIN_Z;
+					Vector probeFrom = probeTo;
+					const float backDistance = GenerationStepSize + VEC_HULL_MAX.x;
+					probeFrom.z += backDistance + StepHeight;
+					const float sideDistance = VEC_HULL_MAX.y + 1;
+					AddDirectionVector(&probeFrom, OppositeDirection(m_generationDir), backDistance);
+					AddDirectionVector(&probeFrom, DirectionRight(m_generationDir), sideDistance);
+					UTIL_TraceHull(probeFrom, probeTo, ignore_monsters, head_hull, ENT(pev), &result);
+					if(result.fAllSolid && !(result.pHit && IsEntityWalkable(VARS(result.pHit), WALK_THRU_EVERYTHING))) {
+						AddDirectionVector(&probeFrom, DirectionLeft(m_generationDir), 2 * sideDistance);
+						UTIL_TraceHull(probeFrom, probeTo, ignore_monsters, head_hull, ENT(pev), &result);
+						if(result.fAllSolid && !(result.pHit && IsEntityWalkable(VARS(result.pHit), WALK_THRU_EVERYTHING))) {
+							walkable = false;
+						}
+					}
+				}
+#endif
+
 				if (walkable)
 				{
 					// we can move here
