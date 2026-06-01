@@ -801,6 +801,10 @@ private:
 
 	CountdownTimer m_mustRunTimer;					// if nonzero, bot cannot walk
 
+#ifdef REGAMEDLL_ADD
+	float m_elevatorTime;							// last time the bot was riding an elevator
+#endif
+
 	// game scenario mechanisms
 	CSGameState m_gameState;
 

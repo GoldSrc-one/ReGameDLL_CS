@@ -294,7 +294,10 @@ void CCSBot::BotTouch(CBaseEntity *pOther)
 
 #ifdef REGAMEDLL_ADD
 	if(pOther->pev->targetname && (FClassnameIs(pOther->pev, "func_door") || FClassnameIs(pOther->pev, "func_door_rotating") || FClassnameIs(pOther->pev, "func_plat") || FClassnameIs(pOther->pev, "func_platrot"))) {
-		if(gpGlobals->time - pOther->pev->nextthink > 5.0f) {
+		if(pOther->pev->nextthink > gpGlobals->time) {
+			m_elevatorTime = gpGlobals->time;
+		}
+		else if(pOther->pev->nextthink <= 0.f && gpGlobals->time - m_elevatorTime > 5.f) {
 			CBaseEntity* pButton = nullptr;
 			while((pButton = UTIL_FindEntityByString(pButton, "target", pOther->pev->targetname)) && !FNullEnt(pButton->edict())) {
 				if(FClassnameIs(pButton->pev, "func_button") || FClassnameIs(pButton->pev, "func_rot_button")) {

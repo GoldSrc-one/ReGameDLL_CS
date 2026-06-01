@@ -277,6 +277,10 @@ void CCSBot::ResetValues()
 	m_radioSubject = nullptr;
 	m_voiceFeedbackEndTimestamp = 0.0f;
 
+#ifdef REGAMEDLL_ADD
+	m_elevatorTime = 0.f;
+#endif
+
 	m_hostageEscortCount = 0;
 	m_hostageEscortCountTimestamp = 0.0f;
 
