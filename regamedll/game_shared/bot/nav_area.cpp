@@ -158,12 +158,18 @@ void CNavArea::Initialize()
 	m_parentHow = GO_NORTH;
 	m_attributeFlags = 0;
 	m_place = 0;
+#ifdef REGAMEDLL_ADD
+	m_playersInAreaTimestamp = 0;
+#endif
 
 	for (int i = 0; i < MAX_AREA_TEAMS; i++)
 	{
 		m_danger[i] = 0.0f;
 		m_dangerTimestamp[i] = 0.0f;
 		m_clearedTimestamp[i] = 0.0f;
+#ifdef REGAMEDLL_ADD
+		m_playersInArea[i] = 0;
+#endif
 	}
 
 	m_approachCount = 0;
@@ -3589,9 +3595,27 @@ const Vector *FindNearbyRetreatSpot(CBaseEntity *me, const Vector *start, CNavAr
 }
 
 // Return number of players with given teamID in this area (teamID == 0 means any/all)
-// TODO: Keep pointers to contained Players to make this a zero-time query
 int CNavArea::GetPlayerCount(int teamID, CBasePlayer *pEntIgnore) const
 {
+#ifdef REGAMEDLL_ADD
+	//speed optimized version because this function gets called from the pathfinding weight function (called a lot!)
+	if(m_playersInAreaTimestamp != gpGlobals->time)
+		return 0;
+
+	int ignoreIndex = pEntIgnore ? ENTINDEX(pEntIgnore->pev) : -1;
+	int total = 0;
+	for(int i = 0; i < gpGlobals->maxClients; i++) {
+		if(i == ignoreIndex)
+			continue;
+
+		unsigned int mask = 1u << i;
+		if((!teamID || teamID == 1) && (m_playersInArea[0] & mask))
+			total++;
+		if((!teamID || teamID == 2) && (m_playersInArea[1] & mask))
+			total++;
+	}
+	return total;
+#else
 	int nCount = 0;
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
@@ -3617,7 +3641,23 @@ int CNavArea::GetPlayerCount(int teamID, CBasePlayer *pEntIgnore) const
 	}
 
 	return nCount;
+#endif
 }
+
+#ifdef REGAMEDLL_ADD
+void CNavArea::SetPlayerInArea(const CBasePlayer* player) {
+	if(player->m_iTeam <= UNASSIGNED || player->m_iTeam >= SPECTATOR)
+		return;
+
+	if(m_playersInAreaTimestamp != gpGlobals->time) {
+		for(int iTeam = 0; iTeam < MAX_AREA_TEAMS; iTeam++)
+			m_playersInArea[iTeam] = 0;
+
+		m_playersInAreaTimestamp = gpGlobals->time;
+	}
+	m_playersInArea[player->m_iTeam - 1] |= 1u << (ENTINDEX(player->pev) - 1);
+}
+#endif
 
 CNavArea *GetMarkedArea()
 {

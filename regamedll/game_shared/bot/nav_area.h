@@ -242,6 +242,9 @@ public:
 	bool IsOverlappingX(const CNavArea *area) const;					// return true if 'area' overlaps our X extent
 	bool IsOverlappingY(const CNavArea *area) const;					// return true if 'area' overlaps our Y extent
 	int GetPlayerCount(int teamID = 0, CBasePlayer *ignore = nullptr) const;			// return number of players with given teamID in this area (teamID == 0 means any/all)
+#ifdef REGAMEDLL_ADD
+	void SetPlayerInArea(const CBasePlayer* player);
+#endif
 	float GetZ(const Vector *pos) const;								// return Z of area at (x,y) of 'pos'
 	float GetZ(float x, float y) const;									// return Z of area at (x,y) of 'pos'
 	bool Contains(const Vector *pos) const;								// return true if given point is on or above this area, but no others
@@ -422,6 +425,11 @@ private:
 	NavTraverseType m_parentHow;		// how we get from parent to us
 	float m_totalCost;					// the distance so far plus an estimate of the distance left
 	float m_costSoFar;					// distance travelled so far
+
+#ifdef REGAMEDLL_ADD
+	float m_playersInAreaTimestamp;
+	unsigned int m_playersInArea[MAX_AREA_TEAMS];
+#endif
 
 	static CNavArea *m_openList;
 	CNavArea *m_nextOpen, *m_prevOpen;		// only valid if m_openMarker == m_masterMarker

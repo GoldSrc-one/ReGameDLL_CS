@@ -191,6 +191,19 @@ void CBotManager::StartFrame()
 		}
 	}
 
+#ifdef REGAMEDLL_ADD
+	//register each player into its current area so we can later use that information for pathfinding
+	for(int i = 1; i <= gpGlobals->maxClients; i++) {
+		CBasePlayer* pPlayer = UTIL_PlayerByIndex(i);
+		if(!IsEntityValid(pPlayer) || !pPlayer->IsPlayer() || !pPlayer->IsAlive())
+			continue;
+
+		auto playerArea = TheNavAreaGrid.GetNavArea(&pPlayer->pev->origin);
+		if(playerArea)
+			playerArea->SetPlayerInArea(pPlayer);
+	}
+#endif
+
 	// Process each active bot
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
