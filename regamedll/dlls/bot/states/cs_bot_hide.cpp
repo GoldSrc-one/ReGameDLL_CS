@@ -60,7 +60,7 @@ void HideState::OnEnter(CCSBot *me)
 	m_firstHeardEnemyTime = 0.0f;
 	m_retry = 0;
 
-	if (me->IsFollowing())
+	if (me->IsFollowing() && me->GetFollowLeader())
 	{
 		m_leaderAnchorPos = me->GetFollowLeader()->pev->origin;
 	}
@@ -113,7 +113,7 @@ void HideState::OnUpdate(CCSBot *me)
 		}
 
 		// if we are momentarily hiding while following someone, check to see if he has moved on
-		if (me->IsFollowing())
+		if (me->IsFollowing() && me->GetFollowLeader())
 		{
 			CBasePlayer *pLeader = me->GetFollowLeader();
 
