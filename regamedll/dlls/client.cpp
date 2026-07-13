@@ -320,7 +320,7 @@ void EXT_FUNC ClientDisconnect(edict_t *pEntity)
 	if (!g_pGameRules->IsGameOver())
 	{
 		UTIL_ClientPrintAll(HUD_PRINTNOTIFY, "#Game_disconnected", STRING(pEntity->v.netname));
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 		CSound *pSound = CSoundEnt::SoundPointerForIndex(CSoundEnt::ClientSoundIndex(pEntity));
 
 		if (pSound)

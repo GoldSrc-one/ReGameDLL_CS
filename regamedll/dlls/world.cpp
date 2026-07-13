@@ -292,7 +292,7 @@ void CWorld::Precache()
 	g_pGameRules = InstallGameRules();
 
 	// NOTE: What is the essence of soundent in CS 1.6? I think this is for NPC monsters - s1lent
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	// UNDONE why is there so much Spawn code in the Precache function? I'll just keep it here
 
 	// LATER - do we want a sound ent in deathmatch? (sjb)

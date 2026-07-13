@@ -137,7 +137,7 @@ void CFuncMortarField::FieldUse(CBaseEntity *pActivator, CBaseEntity *pCaller, U
 		CBaseEntity *pMortar = Create("monster_mortar", tr.vecEndPos, Vector(0, 0, 0), pentOwner);
 		pMortar->pev->nextthink = gpGlobals->time + t;
 		t += RANDOM_FLOAT(0.2, 0.5);
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 		if (i == 0)
 		{
 			CSoundEnt::InsertSound(bits_SOUND_DANGER, tr.vecEndPos, 400, 0.3);

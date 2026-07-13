@@ -47,7 +47,7 @@ void CGrenade::__API_HOOK(Explode)(TraceResult *pTrace, int bitsDamageType)
 
 	int iContents = UTIL_PointContents(pev->origin);
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3);
 #endif
 	entvars_t *pevOwner = VARS(pev->owner);
@@ -170,7 +170,7 @@ void CGrenade::__API_HOOK(Explode2)(TraceResult *pTrace, int bitsDamageType)
 	// Sound! for everyone
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/c4_explode1.wav", VOL_NORM, 0.25);
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3);
 #endif
 	entvars_t *pevOwner = VARS(pev->owner);
@@ -279,7 +279,7 @@ void CGrenade::__API_HOOK(Explode3)(TraceResult *pTrace, int bitsDamageType)
 		WRITE_BYTE(TE_EXPLFLAG_NONE);	// flags
 	MESSAGE_END();
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3);
 #endif
 	entvars_t *pevOwner = VARS(pev->owner);
@@ -337,7 +337,7 @@ NOXREF void CGrenade::SG_Explode(TraceResult *pTrace, int bitsDamageType)
 
 	int iContents = UTIL_PointContents(pev->origin);
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3);
 #endif
 
@@ -548,7 +548,7 @@ void CGrenade::DetonateUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 
 void CGrenade::PreDetonate()
 {
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin, 400, 0.3);
 #endif
 
@@ -665,7 +665,7 @@ void CGrenade::DangerSoundThink()
 		return;
 	}
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5, pev->velocity.Length(), 0.2);
 #endif
 	pev->nextthink = gpGlobals->time + 0.2f;
@@ -688,7 +688,7 @@ void CGrenade::BounceTouch(CBaseEntity *pOther)
 		return;
 	}
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	Vector vecTestVelocity;
 
 	// this is my heuristic for modulating the grenade velocity because grenades dropped purely vertical
@@ -696,7 +696,7 @@ void CGrenade::BounceTouch(CBaseEntity *pOther)
 	// trimming the Z velocity a bit seems to help quite a bit.
 	vecTestVelocity = pev->velocity;
 	vecTestVelocity.z *= 0.7f;
-
+	
 	if (!m_fRegisteredSound && vecTestVelocity.Length() <= 60.0f)
 	{
 		// grenade is moving really slow. It's probably very close to where it will ultimately stop moving.
@@ -798,7 +798,7 @@ void CGrenade::TumbleThink()
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	if (pev->dmgtime - 1 < gpGlobals->time)
 	{
 		CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin + pev->velocity * (pev->dmgtime - gpGlobals->time), 400, 0.1);
@@ -847,7 +847,7 @@ void CGrenade::SG_TumbleThink()
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	if (pev->dmgtime - 1 < gpGlobals->time)
 	{
 		CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin + pev->velocity * (pev->dmgtime - gpGlobals->time), 400, 0.1);

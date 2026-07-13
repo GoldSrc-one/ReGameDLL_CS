@@ -2343,7 +2343,7 @@ void EXT_FUNC CBasePlayer::__API_HOOK(Killed)(entvars_t *pevAttacker, int iGib)
 
 	DetachTank();
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSound *pSound = CSoundEnt::SoundPointerForIndex(CSoundEnt::ClientSoundIndex(edict()));
 
 	if (pSound)
@@ -3839,7 +3839,7 @@ void EXT_FUNC CBasePlayer::__API_HOOK(Disappear)()
 {
 	DetachTank();
 
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	CSound *pSound = CSoundEnt::SoundPointerForIndex(CSoundEnt::ClientSoundIndex(edict()));
 
 	if (pSound)
@@ -5349,7 +5349,7 @@ void EXT_FUNC CBasePlayer::__API_HOOK(PostThink)()
 
 	if (pev->flags & FL_ONGROUND)
 	{
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 		if (m_flFallVelocity > 64.0f && !g_pGameRules->IsMultiplayer())
 		{
 			CSoundEnt::InsertSound(bits_SOUND_PLAYER, pev->origin, m_flFallVelocity, 0.2);
@@ -5380,7 +5380,7 @@ void EXT_FUNC CBasePlayer::__API_HOOK(PostThink)()
 #endif
 
 	// NOTE: this is useless for CS 1.6 - s1lent
-#ifndef REGAMEDLL_FIXES
+#ifndef REGAMEDLL_NOSOUNDENT
 	UpdatePlayerSound();
 #endif
 
