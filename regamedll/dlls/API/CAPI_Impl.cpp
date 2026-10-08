@@ -143,6 +143,11 @@ CGrenade *EXT_FUNC SpawnGrenade_api(WeaponIdType weaponId, entvars_t *pevOwner, 
 	return nullptr;
 }
 
+void EXT_FUNC StudioProcessGait_api(CBasePlayer *pPlayer)
+{
+	pPlayer->StudioProcessGait();
+}
+
 ReGameFuncs_t g_ReGameApiFuncs = {
 	CREATE_NAMED_ENTITY,
 
@@ -176,6 +181,7 @@ ReGameFuncs_t g_ReGameApiFuncs = {
 	TextureTypePlaySound_api,
 	CreateWeaponBox_api,
 	SpawnGrenade_api,
+	StudioProcessGait_api,
 };
 
 GAMEHOOK_REGISTRY(CBasePlayer_Spawn);
