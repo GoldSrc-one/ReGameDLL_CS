@@ -8964,11 +8964,8 @@ void CBasePlayer::StudioEstimateGait()
 		else
 			flYawDiff *= dt;
 
-#ifdef REGAMEDLL_FIXES
-		if (real_t(Q_abs(flYawDiff)) < 0.1f)
-#else
+		//it doesn't make much sense but it matches the client
 		if (real_t(Q_abs(int64(flYawDiff))) < 0.1f)
-#endif
 			flYawDiff = 0;
 
 		m_flGaityaw += flYawDiff;
